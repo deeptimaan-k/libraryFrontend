@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Shakya Digital Library</title>
+    <link rel="stylesheet" href="./css/formcss.css">
+</head>
+
+<body>
+    <div id="nav-placeholder"></div>
+    <div id="navigation"></div>
+
+    <script>
+        // Function to fetch and render the navigation component
+        function loadNavigation() {
+            var xhttpHTML = new XMLHttpRequest();
+            xhttpHTML.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("navigation").innerHTML = this.responseText;
+                    loadCSS();
+                    loadScript();
+                }
+            };
+            xhttpHTML.open("GET", "./NavigationBar/nav.html", true);
+            xhttpHTML.send();
+        }
+
+        // Function to load the CSS file for the navigation component
+        function loadCSS() {
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = './NavigationBar/NavStyle.css';
+            document.head.appendChild(link);
+        }
+
+        // Function to load the JavaScript file for the navigation component
+        function loadScript() {
+            var script = document.createElement('script');
+            script.src = './NavigationBar/NavScript.js';
+            document.body.appendChild(script);
+        }
+
+        // Load the navigation component
+        loadNavigation();
+    </script>
+
+    <br><br><br><br>
+
+    <div class="overlay"></div>
+    <div class="container">
+        <h1>Delete Record</h1>
+        <form id="studentForm">
+            <div>
+                <label for="rollNumber">Roll Number:</label>
+                <input type="text" id="rollNumber" name="rollNumber" required>
+                <Br></Br>
+                <button id="fetchButton" class="fetchButton" type="button">Fetch Record</button>
+            </div>
+            <div>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" readonly>
+            </div>
+            <div>
+                <label for="mobileNumber">Mobile Number:</label>
+                <input type="text" id="mobileNumber" name="mobileNumber" readonly>
+            </div>
+            <div>
+                <label for="dateOfAdmission">Date of Admission:</label>
+                <input type="date" id="dateOfAdmission" name="dateOfAdmission" readonly>
+            </div>
+            <div>
+                <label>Slots:</label><br>
+                <input type="checkbox" id="slot1" name="slots" value="slot1" disabled>
+                <label for="slot1">Slot 1</label><br>
+                <input type="checkbox" id="slot2" name="slots" value="slot2" disabled>
+                <label for="slot2">Slot 2</label><br>
+                <input type="checkbox" id="slot3" name="slots" value="slot3" disabled>
+                <label for="slot3">Slot 3</label><br>
+            </div>
+            <div>
+                <label for="seatNumber">Seat Number:</label>
+                <input type="text" id="seatNumber" name="seatNumber" readonly>
+            </div>
+            <div id="loading" class="loading-css" style="visibility: hidden;">
+                <img src="./loading.gif" alt="Loading...">
+            </div>
+            <button id="deleteButton" type="button" style="display: none;">Delete Record</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById("fetchButton").addEventListener("click", async function () {
+            const rollNumber = document.getElementById("rollNumber").value;
+    
+            try {
+                // Show loading GIF
+                document.getElementById("loading").style.visibility = "visible";
+    
+                const response = await fetch(`https://librarybackend-wh54.onrender.com/students/${rollNumber}`, {
+                    method: "GET"
+                });
+    
+                const studentData = await response.json();
+    
+                if (!response.ok) {
+                    throw new Error(studentData.error || 'An error occurred');
+                }
+    
+                // Display fetched data in readonly mode
+                document.getElementById("name").value = studentData.name;
+                document.getElementById("name").readOnly = true;
+    
+                document.getElementById("mobileNumber").value = studentData.mobileNumber;
+                document.getElementById("mobileNumber").readOnly = true;
+    
+                document.getElementById("dateOfAdmission").value = studentData.dateOfAdmission;
+                document.getElementById("dateOfAdmission").readOnly = true;
+    
+                // You may need to handle slots and seatNumber as per your data structure
+                document.getElementById("slot1").checked = studentData.slots.includes("slot1");
+                document.getElementById("slot2").checked = studentData.slots.includes("slot2");
+                document.getElementById("slot3").checked = studentData.slots.includes("slot3");
+    
+                document.getElementById("seatNumber").value = studentData.seatNumber;
+                document.getElementById("seatNumber").readOnly = true;
+    
+                // Show the delete button
+                document.getElementById("deleteButton").style.display = "block";
+            } catch (error) {
+                console.error("Error:", error);
+                alert(error.message || 'An error occurred');
+            } finally {
+                // Hide loading GIF
+                document.getElementById("loading").style.visibility = "hidden";
+            }
+        });
+    </script>
+    <script>
+        document.getElementById("deleteButton").addEventListener("click", async function () {
+            const rollNumber = document.getElementById("rollNumber").value;
+    
+            try {
+                // Show loading GIF
+                document.getElementById("loading").style.visibility = "visible";
+    
+                const response = await fetch(`https://librarybackend-wh54.onrender.com/students/${rollNumber}`, {
+                    method: "DELETE"
+                });
+    
+                // Check if the response status is 204 (No Content), indicating successful deletion
+                if (response.status === 204) {
+                    alert("Record deleted successfully!");
+                    // Reset form after deletion
+                    document.getElementById("studentForm").reset();
+                    // Hide the delete button
+                    document.getElementById("deleteButton").style.display = "none";
+                } else {
+                    // Parse the response as JSON
+                    const responseData = await response.json();
+    
+                    // Check if response contains error message
+                    if (responseData && responseData.error) {
+                        throw new Error(responseData.error);
+                    } else {
+                        throw new Error("An error occurred while deleting the record.");
+                    }
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert(error.message || 'An error occurred');
+            } finally {
+                // Hide loading GIF
+                document.getElementById("loading").style.visibility = "hidden";
+            }
+        });
+    </script>
+    
+</body>
+
+</html>

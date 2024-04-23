@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shakya Digital Library</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    /* Style the counter cards */
+    .card {
+      position: relative;
+      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); /* this adds the "card" effect */
+      padding: 16px;
+      text-align: center;
+      background-color: #f1f1f1;
+      transition: box-shadow 0.3s ease, transform 0.3s ease; /* Add transition for smoother hover effect */
+    }
+    /* Style the icon */
+    .card-icon {
+      font-size: 3em;
+      margin-bottom: 10px; /* Add some space between icon and text */
+    }
+  
+    /* Center vertically */
+    html, body {
+      height: 100%;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative; /* Add relative positioning to the body */
+    }
+    .container{
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  border-radius: 10px;
+  box-shadow: 0 0 5px #aaa inset;
+  border-radius: 10px;
+}
+    /* Add hover effect */
+    .card:hover {
+      box-shadow: 0 16px 32px 0 rgba(0, 0, 0, 0.2); /* Change box shadow on hover */
+      transform: translateY(-10px); /* Move the card slightly up on hover */
+    }
+    /* Add anchor tag style */
+    .card a {
+      text-decoration: none;
+      color: inherit; /* Inherit color from parent */
+    }
+    /* 3D effect */
+    .card:before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.1);
+      transition: opacity 0.3s ease;
+      border-radius: 10px;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .card:hover:before {
+      opacity: 1;
+    }
+    /* Overlay */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('./img/dashboard.jpg');
+      background-size: cover;
+      background-position: center;
+      z-index: -1;
+      filter: blur(5px);
+      -webkit-filter: blur(5px);
+    }
+    /* Logout button */
+    .logout-btn {
+      position: absolute;
+      top: 10px; /* Adjust as needed */
+      right: 10px; /* Adjust as needed */
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      color: #FF6347; /* Change color */
+    }
+    .logout-btn:hover {
+      transform: scale(1.1); /* Scale up on hover */
+    }
+    /* Larger icon */
+    .logout-icon {
+      font-size: 1.5em;
+    }
+    h1 {
+  font-size: 3em; /* Increase font size */
+  font-family: 'Arial', sans-serif; /* Change font family if needed */
+  color: white; /* Set color to white */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Add text shadow for better visibility */
+  transform: translateZ(25px); /* Apply a 3D translation on the z-axis */
+}
+
+
+  </style>
+</head>
+<body>
+<!-- Heading -->
+<div class="overlay"></div>
+<!-- Logout button -->
+<a href="../index.html" class="logout-btn">
+    <i class="fas fa-sign-out-alt logout-icon"></i> <!-- Logout icon -->
+    Logout
+  </a>
+  
+
+<div class="container">
+    <h1 class="text-center mb-4">SHAKYA DIGITAL LIBRARY</h1>
+  <div class="row">
+    <div class="col-md-3 mb-5">
+      <div class="card gradient-custom">
+        <a href="./addStudent.html">
+          <div class="card-body">
+            <i class="fas fa-user-plus card-icon" style="color: #FF6347;"></i> <!-- Change color to red -->
+            <p class="card-text">Add Student</p>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="col-md-3 mb-5">
+      <div class="card gradient-custom">
+        <a href="./updateStudent.html">
+          <div class="card-body">
+            <i class="fas fa-user-edit card-icon" style="color: #1E90FF;"></i> <!-- Change color to blue -->
+            <p class="card-text">Update Student</p>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="col-md-3 mb-5">
+      <div class="card gradient-custom">
+        <a href="./deleteStudent.html">
+          <div class="card-body">
+            <i class="fas fa-user-times card-icon" style="color: #32CD32;"></i> <!-- Change color to green -->
+            <p class="card-text">Delete Student</p>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="col-md-3 mb-5">
+      <div class="card gradient-custom">
+        <a href="#">
+          <div class="card-body">
+            <i class="fas fa-money-bill-alt card-icon" style="color: #FFD700;"></i> <!-- Change color to gold -->
+            <p class="card-text">Fee Dashboard</p>
+          </div>
+        </a>
+      </div>
+    </div>
+    <!-- New column for the Report card -->
+    <div class="col-md-3 mb-5">
+      <div class="card gradient-custom">
+        <a href="./records.html">
+          <div class="card-body">
+            <i class="fas fa-chart-bar card-icon" style="color: #9400D3;"></i> <!-- Change color to violet -->
+            <p class="card-text">Report</p>
+          </div>
+        </a>
+      </div>
+    </div>
+      <!-- New card: Seating Plan -->
+    <div class="col-md-3 mb-5">
+        <div class="card gradient-custom">
+          <a href="#">
+            <div class="card-body">
+              <i class="fas fa-chair card-icon" style="color: #FFA500;"></i> <!-- Adjust icon and color as needed -->
+              <p class="card-text">Seating Plan</p>
+            </div>
+          </a>
+        </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
