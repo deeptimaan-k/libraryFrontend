@@ -10,8 +10,8 @@
     <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/semantic.rtl.min.css"/>
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css"/>
- <!-- Include Lottie library -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device">
 </head>
 <body>
     <img class="wave" src="img/wave.png">
@@ -41,28 +41,25 @@
                         <input type="password" class="input" id="password">
                    </div>
                 </div>
-                <button type="submit" class="btn" id="loginButton">Login</button> <!-- Change input type to button -->
-                <div id="loading" class="loading-css" style="display: none;"></div> <!-- Add container for Lottie animation -->
+                <button type="submit" class="btn" id="loginButton">Login</button> 
+                <div id="loading" class="loading-css" style="display: none;"></div>
             </form>
         </div>
     </div>
     <script>
         document.getElementById("loginForm").addEventListener("submit", function(event) {
-            event.preventDefault(); // Prevent default form submission
+            event.preventDefault();
 
-            // Hide login button
             document.getElementById("loginButton").style.display = "none";
 
-            // Show loading animation
+           
             document.getElementById("loading").style.display = "block";
 
-            // Fetch animation data from JSON file
             fetch("loading.json")
                 .then(response => response.json())
                 .then(data => {
-                    // Render animation using Lottie
                     const animationContainer = document.getElementById("loading");
-                    animationContainer.innerHTML = ''; // Clear previous animation if any
+                    animationContainer.innerHTML = ''; 
                     const animation = bodymovin.loadAnimation({
                         container: animationContainer,
                         renderer: 'svg',
@@ -75,14 +72,12 @@
                     console.error("Error fetching animation data:", error);
                 });
 
-            // Get username and password from form fields
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
 
-            // Simulate form submission delay (remove this timeout in your actual implementation)
+           
             setTimeout(function() {
-                // Send POST request to Express server
-                fetch("https://librarybackend-wh54.onrender.com/login", {
+                fetch("http://localhost:3000/login", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -91,33 +86,31 @@
                 })
                 .then(response => {
                     if (response.ok) {
-                        // If response status is OK, it means login was successful
-                        return response.text(); // Parse response body as text
+                
+                        return response.text();
                     } else {
-                        // If response status is not OK, it means login failed
+                        
                         throw new Error('Invalid username or password');
                     }
                 })
                 .then(data => {
-                    // Hide loading animation
+                    
                     document.getElementById("loading").style.display = "none";
 
-                    // Show login button
                     document.getElementById("loginButton").style.display = "block";
                     alertify.set('notifier', 'position', 'top-right');
                     alertify.success(data);
-                    window.location.href = "./Pages/dashboard.html"; // Show success alert
+                    window.location.href = "./Pages/dashboard.html";
                 })
                 .catch(error => {
                     console.error("Error:", error);
-                    // Hide loading animation in case of error
                     document.getElementById("loading").style.display = "none";
-                    // Show login button
                     document.getElementById("loginButton").style.display = "block";
+                    document.getElementById("loginButton").
                     alertify.set('notifier', 'position', 'top-right');
-                    alertify.error(error.message); // Show warning alert with error message
+                    alertify.error(error.message); 
                 });
-            }, 1000); // Simulate form submission delay of 1 second (remove this in your actual implementation)
+            }, 1000); 
         });
     </script>
     <script type="text/javascript" src="js/main.js"></script>

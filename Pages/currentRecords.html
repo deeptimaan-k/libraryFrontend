@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shakya Digital Library</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        .loading-spinner {
+            display: none;
+            margin-left: 10px;
+        }
+
+        .loading-spinner img {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="nav-placeholder"></div>
+    <div id="navigation"></div>
+
+    <script>
+        // Function to fetch and render the navigation component
+        function loadNavigation() {
+            var xhttpHTML = new XMLHttpRequest();
+            xhttpHTML.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("navigation").innerHTML = this.responseText;
+                    loadCSS();
+                    loadScript();
+                }
+            };
+            xhttpHTML.open("GET", "./NavigationBar/nav.html", true);
+            xhttpHTML.send();
+        }
+
+        // Function to load the CSS file for the navigation component
+        function loadCSS() {
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = './NavigationBar/NavStyle.css';
+            document.head.appendChild(link);
+        }
+
+        // Function to load the JavaScript file for the navigation component
+        function loadScript() {
+            var script = document.createElement('script');
+            script.src = './NavigationBar/NavScript.js';
+            document.body.appendChild(script);
+        }
+
+        // Load the navigation component
+        loadNavigation();
+    </script>
+    <section>
+        <br><br><br><br>
+        <div class="container mt-4">
+            <h1 class="my-4">Current Students Report</h1>
+            <!-- Search form -->
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <select id="searchCriteria" class="form-select">
+                        <option value="name">Name</option>
+                        <option value="rollNumber">Registration Number</option>
+                        <option value="aadharNo">Aadhar Number</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Enter search term">
+                </div>
+                <div class="col-md-2">
+                    <button id="searchButton" class="btn btn-primary">Search
+                        <div class="loading-spinner">
+                            <img src="loading.gif" alt="Loading...">
+                        </div>
+                    </button>
+                </div>
+            </div>
+            <!-- Export button -->
+            <div class="text-end mb-3">
+                <button id="exportButton" class="btn btn-primary">Export to Excel
+                    <div class="loading-spinner">
+                        <img src="loading.gif" alt="Loading...">
+                    </div>
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Roll Number</th>
+                            <th>Name</th>
+                            <th>Gender</th>
+                            <th>Date of Birth</th>
+                            <th>Aadhar Number</th>
+                            <th>Contact</th>
+                            <th>Residential Number</th>
+                            <th>Father's Name</th>
+                            <th>Father's Occupation</th>
+                            <th>Permanent Address</th>
+                            <th>Postal Address</th>
+                            <th>Academic</th>
+                            <th>Prepare For</th>
+                            <th>Date of Admission</th>
+                            <th>Slots</th>
+                            <th>Seat Number</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    <script>
+        async function fetchStudents(query = "", criteria = "") {
+            try {
+                const url = query && criteria ? `http://localhost:3000/currentRecords/search` : `http://localhost:3000/currentRecords`;
+                const requestBody = query && criteria ? { [criteria]: query } : {};
+        
+                const options = query && criteria ? {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                } : {
+                    method: 'GET'
+                };
+                const response = await fetch(url, options);
+                const studentData = await response.json();
+        
+                if (!response.ok) {
+                    throw new Error(studentData.error || 'An error occurred');
+                }
+        
+                console.log('Fetched students:', studentData); // Debug log
+        
+                const tableBody = document.getElementById("studentTableBody");
+                tableBody.innerHTML = "";
+                studentData.forEach(student => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${student.rollNumber}</td>
+                        <td>${student.name}</td>
+                        <td>${student.gender}</td>
+                        <td>${student.dob.substr(0, 10)}</td>
+                        <td>${student.aadharNo}</td>
+                        <td>${student.contact}</td>
+                        <td>${student.residentialNo}</td>
+                        <td>${student.Fname}</td>
+                        <td>${student.FOccupation}</td>
+                        <td>${student.permanentAddress}</td>
+                        <td>${student.postalAddress}</td>
+                        <td>${student.academic}</td>
+                        <td>${student.prepareFor}</td>
+                        <td>${student.dateOfAdmission.substr(0, 10)}</td>
+                        <td>${student.slots.map(slot => `<input type="checkbox" checked disabled> ${slot}`).join(", ")}</td>
+                        <td>${student.seatNumber}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error("Error:", error);
+                alert(error.message || 'An error occurred');
+            }
+        }
+        
+        document.addEventListener("DOMContentLoaded", function () {
+            fetchStudents();
+        
+            document.getElementById("searchButton").addEventListener("click", function () {
+                const query = document.getElementById("searchInput").value;
+                const criteria = document.getElementById("searchCriteria").value;
+        
+                // Show loading spinner
+                document.querySelector('#searchButton .loading-spinner').style.display = 'inline-block';
+        
+                fetchStudents(query, criteria).finally(() => {
+                    // Hide loading spinner
+                    document.querySelector('#searchButton .loading-spinner').style.display = 'none';
+                });
+            });
+        
+            document.getElementById("exportButton").addEventListener("click", function () {
+                const table = document.querySelector("table");
+                const tableData = Array.from(table.querySelectorAll("tr")).map(row =>
+                    Array.from(row.querySelectorAll("td, th")).map(cell => cell.textContent)
+                );
+        
+                // Make header row bold
+                const headerRow = tableData[0];
+                headerRow.forEach((cell, index) => {
+                    headerRow[index] = { v: cell, s: { font: { bold: true } } };
+                });
+        
+                const sheet = XLSX.utils.aoa_to_sheet(tableData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, sheet, "Student Report");
+                XLSX.writeFile(workbook, "student_report.xlsx");
+        
+                // Hide loading spinner
+                document.querySelector('#exportButton .loading-spinner').style.display = 'none';
+            });
+        });
+    </script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- xlsx library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.0/xlsx.full.min.js"></script>
+    <!-- Fetch student data and populate the table -->
+
+</body>
+
+</html>

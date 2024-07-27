@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Details</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f0f0f0;
+      margin: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+    .container h1 {
+      margin-top: 0;
+      color: #333;
+    }
+    .fee-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+    .fee-button:hover {
+      background-color: #0056b3;
+    }
+    .card {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      padding: 20px;
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.5em;
+      color: #444;
+    }
+    .card p {
+      margin: 0;
+      padding: 5px 0;
+      font-size: 16px;
+    }
+    .card p strong {
+      display: inline-block;
+      width: 150px;
+      color: #555;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    .error-message {
+      color: red;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="./dashboard.html"><button class="fee-button">Dashboard</button></a>
+    <h1>Student Details</h1>
+    <div class="card">
+      <h2>Student Information</h2>
+      <table>
+        <tr>
+          <th>Name</th>
+          <td id="name"></td>
+        </tr>
+        <tr>
+          <th>Roll Number</th>
+          <td id="rollNumber"></td>
+        </tr>
+        <tr>
+          <th>Gender</th>
+          <td id="gender"></td>
+        </tr>
+        <tr>
+          <th>Date of Birth</th>
+          <td id="dob"></td>
+        </tr>
+        <tr>
+          <th>Aadhar Number</th>
+          <td id="aadharNo"></td>
+        </tr>
+        <tr>
+          <th>Contact</th>
+          <td id="contact"></td>
+        </tr>
+        <tr>
+          <th>Residential No</th>
+          <td id="residentialNo"></td>
+        </tr>
+        <tr>
+          <th>Father's Name</th>
+          <td id="Fname"></td>
+        </tr>
+        <tr>
+          <th>Father's Occupation</th>
+          <td id="FOccupation"></td>
+        </tr>
+        <tr>
+          <th>Permanent Address</th>
+          <td id="permanentAddress"></td>
+        </tr>
+        <tr>
+          <th>Postal Address</th>
+          <td id="postalAddress"></td>
+        </tr>
+        <tr>
+          <th>Academic</th>
+          <td id="academic"></td>
+        </tr>
+        <tr>
+          <th>Prepare For</th>
+          <td id="prepareFor"></td>
+        </tr>
+        <tr>
+          <th>Date of Admission</th>
+          <td id="dateOfAdmission"></td>
+        </tr>
+        <tr>
+          <th>Slots</th>
+          <td id="slots"></td>
+        </tr>
+      </table>
+    </div>
+    <div class="error-message" id="error-message"></div>
+  </div>
+
+  <script>
+    // Get the student seat number from the URL query parameters
+    const params = new URLSearchParams(window.location.search);
+    const seatNumber = params.get('seatNumber');
+
+    // Fetch student details using the seat number
+    fetch(`http://localhost:3000/currentRecords/seat/${seatNumber}`)
+      .then(response => response.json())
+      .then(data => {
+        console.log('Fetched data:', data); // Debugging step
+        
+        if (data.length > 0) {
+          const student = data[0];
+          document.getElementById('name').textContent = student.name || 'N/A';
+          document.getElementById('rollNumber').textContent = student.rollNumber || 'N/A';
+          document.getElementById('gender').textContent = student.gender || 'N/A';
+          document.getElementById('dob').textContent = student.dob ? new Date(student.dob).toLocaleDateString() : 'N/A';
+          document.getElementById('aadharNo').textContent = student.aadharNo || 'N/A';
+          document.getElementById('contact').textContent = student.contact || 'N/A';
+          document.getElementById('residentialNo').textContent = student.residentialNo || 'N/A';
+          document.getElementById('Fname').textContent = student.Fname || 'N/A';
+          document.getElementById('FOccupation').textContent = student.FOccupation || 'N/A';
+          document.getElementById('permanentAddress').textContent = student.permanentAddress || 'N/A';
+          document.getElementById('postalAddress').textContent = student.postalAddress || 'N/A';
+          document.getElementById('academic').textContent = student.academic || 'N/A';
+          document.getElementById('prepareFor').textContent = student.prepareFor || 'N/A';
+          document.getElementById('dateOfAdmission').textContent = student.dateOfAdmission ? new Date(student.dateOfAdmission).toLocaleDateString() : 'N/A';
+          document.getElementById('slots').textContent = student.slots ? student.slots.join(', ') : 'N/A';
+        } else {
+          document.getElementById('error-message').textContent = 'No details found.';
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching student details:', error);
+        document.getElementById('error-message').textContent = 'Error loading details.';
+      });
+  </script>
+</body>
+</html>

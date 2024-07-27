@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seating Plan</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+    .dropdown {
+      margin: 20px;
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+    .dropdown select {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transition: box-shadow 0.3s;
+    }
+    .dropdown select:focus {
+      outline: none;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(50px, 1fr)); /* Responsive columns */
+      gap: 10px;
+      padding: 10px;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 90vw; /* Adjust width as needed */
+      max-width: 900px; /* Max width for larger screens */
+      height: auto; /* Auto height */
+      margin: 0 auto; /* Center container */
+      position: relative; /* Ensure tooltip is positioned relative to the container */
+    }
+    .seat {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 50px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #e0e0e0;
+      cursor: pointer;
+      position: relative; /* Position relative for tooltip */
+      transition: background-color 0.3s;
+    }
+    .seat-number {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+    }
+    .seat.selected {
+      background-color: #4caf50 !important; /* Green for the selected seat */
+    }
+    .seat.selected .seat-number {
+      color: #fff; /* White font color for selected seats */
+    }
+    .seat.occupied {
+      background-color: #ff4d4d; /* Red for occupied seats */
+    }
+    .seat:hover {
+      background-color: #d0d0d0; /* Light gray for hover effect */
+    }
+    .tooltip {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.7); /* Translucent background */
+      color: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      display: none;
+      white-space: nowrap;
+      z-index: 10;
+      top: 100%; /* Position tooltip below the seat */
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 10px; /* Space between seat and tooltip */
+    }
+    .seat.selected:hover .tooltip {
+      display: block;
+    }
+    .fee-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+    .fee-button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+    <div id="nav-placeholder"></div>
+    <div id="navigation"></div>
+    <!-- <img src="../../index.html" -->
+    <script>
+        // Function to fetch and render the navigation component
+        function loadNavigation() {
+            var xhttpHTML = new XMLHttpRequest();
+            xhttpHTML.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("navigation").innerHTML = this.responseText;
+                    loadCSS();
+                    loadScript();
+                }
+            };
+            xhttpHTML.open("GET", "./NavigationBar/nav.html", true);
+            xhttpHTML.send();
+        }
+
+        // Function to load the CSS file for the navigation component
+        function loadCSS() {
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = './NavigationBar/NavStyle.css';
+            document.head.appendChild(link);
+        }
+
+        // Function to load the JavaScript file for the navigation component
+        function loadScript() {
+            var script = document.createElement('script');
+            script.src = './NavigationBar/NavScript.js';
+            document.body.appendChild(script);
+        }
+
+        // Load the navigation component
+        loadNavigation();
+    </script>
+    <br><br><br><br><br><br><br><br>
+  <!-- <div class="dropdown">
+    <select id="slotSelect">
+      <option value="slot1">Slot 1</option>
+      <option value="slot2">Slot 2</option>
+      <option value="slot3">Slot 3</option>
+    </select>
+  </div> -->
+
+  <div class="container">
+    <!-- JavaScript will populate seats here -->
+  </div>
+<script>
+  const totalSeats = 107;
+
+  // Function to redirect to fee statement
+  function redirectToFeeStatement() {
+    window.location.href = 'fee-statement.html'; // Change to the actual fee statement page URL
+  }
+
+  // Fetch student data
+  fetch('http://localhost:3000/currentRecords')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Fetched data:', data); // Debugging step
+
+      // Create a map of seat information
+      const seatInfoMap = new Map();
+      data.forEach(student => {
+        if (student.seatNumber) {
+          const seatNumber = parseInt(student.seatNumber, 10); // Convert seat number to integer
+          if (seatNumber >= 1 && seatNumber <= totalSeats) { // Check if seat number is within range
+            seatInfoMap.set(seatNumber, {
+              name: student.name,
+              rollNumber: student.rollNumber,
+              slots: student.slots ? student.slots.join(', ') : '' // Convert slots array to a comma-separated string
+            });
+          }
+        }
+      });
+      console.log('Seat info map:', seatInfoMap); // Debugging step
+
+      // Create seats
+      const container = document.querySelector('.container');
+      container.innerHTML = ''; // Clear existing seats
+      
+      for (let i = 1; i <= totalSeats; i++) {
+        const seat = document.createElement('div');
+        seat.classList.add('seat');
+        
+        if (seatInfoMap.has(i)) {
+          seat.classList.add('selected'); // Apply the green color for the selected seat
+          console.log(`Seat ${i} is marked as selected`); // Debugging step
+        }
+        
+        const seatNumber = document.createElement('div');
+        seatNumber.classList.add('seat-number');
+        seatNumber.textContent = i;
+        
+        seat.appendChild(seatNumber);
+
+        // Create tooltip for seat
+        const tooltip = document.createElement('div');
+        tooltip.classList.add('tooltip');
+        if (seatInfoMap.has(i)) {
+          const info = seatInfoMap.get(i);
+          tooltip.innerHTML = `
+            <strong>Name:</strong> ${info.name}<br>
+            <strong>Roll No:</strong> ${info.rollNumber}<br>
+            <strong>Slots:</strong> ${info.slots}
+          `;
+          seat.appendChild(tooltip);
+        }
+
+        // Add click event to redirect to student details page
+        seat.addEventListener('click', () => {
+          if (seat.classList.contains('selected')) {
+            const info = seatInfoMap.get(i);
+            if (info) {
+              window.location.href = `student-details.html?seatNumber=${i}&rollNumber=${info.rollNumber}`;
+            }
+          }
+        });
+
+        container.appendChild(seat);
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching student data:', error);
+    });
+
+  // Dropdown change event
+  document.getElementById('slotSelect').addEventListener('change', (event) => {
+    console.log(`Selected Slot: ${event.target.value}`);
+  });
+</script>
+
+
+</body>
+</html>
