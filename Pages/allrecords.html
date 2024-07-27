@@ -120,7 +120,7 @@
     <script>
         async function fetchStudents(query = "", criteria = "") {
             try {
-                const url = query && criteria ? `http://localhost:3000/allStudents/search` : `http://localhost:3000/allStudents`;
+                const url = query && criteria ? `https://librarybackend-wh54.onrender.com/allStudents/search` : `https://librarybackend-wh54.onrender.com/allStudents`;
                 const requestBody = query && criteria ? { [criteria]: query } : {};
         
                 const options = query && criteria ? {

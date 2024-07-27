@@ -161,7 +161,7 @@
     const seatNumber = params.get('seatNumber');
 
     // Fetch student details using the seat number
-    fetch(`http://localhost:3000/currentRecords/seat/${seatNumber}`)
+    fetch(`https://librarybackend-wh54.onrender.com/currentRecords/seat/${seatNumber}`)
       .then(response => response.json())
       .then(data => {
         console.log('Fetched data:', data); // Debugging step
