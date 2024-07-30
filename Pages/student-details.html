@@ -77,6 +77,11 @@
     th {
       background-color: #f4f4f4;
     }
+    .separator {
+      border: none;
+      border-top: 2px solid #ddd;
+      margin: 20px 0;
+    }
     .error-message {
       color: red;
       text-align: center;
@@ -151,38 +156,53 @@
           <td id="slots"></td>
         </tr>
       </table>
+      <hr class="separator">
+      <div id="slots"></div>
     </div>
     <div class="error-message" id="error-message"></div>
   </div>
 
   <script>
-    // Get the student seat number from the URL query parameters
-    const params = new URLSearchParams(window.location.search);
-    const seatNumber = params.get('seatNumber');
+    // Function to capitalize the first letter and lowercase the rest
+    function capitalizeFirstLetter(str) {
+      if (!str) return '';
+      return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    }
 
-    // Fetch student details using the seat number
-    fetch(`https://librarybackend-wh54.onrender.com/currentRecords/seat/${seatNumber}`)
+    // Get the student roll number from the URL query parameters
+    const params = new URLSearchParams(window.location.search);
+    const rollNumber = params.get('rollNumber');
+
+    // Fetch student details using the roll number
+    fetch(`http://localhost:3000/students/${rollNumber}`)
       .then(response => response.json())
       .then(data => {
         console.log('Fetched data:', data); // Debugging step
-        
-        if (data.length > 0) {
-          const student = data[0];
-          document.getElementById('name').textContent = student.name || 'N/A';
-          document.getElementById('rollNumber').textContent = student.rollNumber || 'N/A';
-          document.getElementById('gender').textContent = student.gender || 'N/A';
-          document.getElementById('dob').textContent = student.dob ? new Date(student.dob).toLocaleDateString() : 'N/A';
-          document.getElementById('aadharNo').textContent = student.aadharNo || 'N/A';
-          document.getElementById('contact').textContent = student.contact || 'N/A';
-          document.getElementById('residentialNo').textContent = student.residentialNo || 'N/A';
-          document.getElementById('Fname').textContent = student.Fname || 'N/A';
-          document.getElementById('FOccupation').textContent = student.FOccupation || 'N/A';
-          document.getElementById('permanentAddress').textContent = student.permanentAddress || 'N/A';
-          document.getElementById('postalAddress').textContent = student.postalAddress || 'N/A';
-          document.getElementById('academic').textContent = student.academic || 'N/A';
-          document.getElementById('prepareFor').textContent = student.prepareFor || 'N/A';
-          document.getElementById('dateOfAdmission').textContent = student.dateOfAdmission ? new Date(student.dateOfAdmission).toLocaleDateString() : 'N/A';
-          document.getElementById('slots').textContent = student.slots ? student.slots.join(', ') : 'N/A';
+        if (data) {
+          document.getElementById('name').textContent = data.name || 'N/A';
+          document.getElementById('rollNumber').textContent = data.rollNumber || 'N/A';
+          document.getElementById('gender').textContent = data.gender || 'N/A';
+          document.getElementById('dob').textContent = data.dob ? new Date(data.dob).toLocaleDateString() : 'N/A';
+          document.getElementById('aadharNo').textContent = data.aadharNo || 'N/A';
+          document.getElementById('contact').textContent = data.contact || 'N/A';
+          document.getElementById('residentialNo').textContent = data.residentialNo || 'N/A';
+          document.getElementById('Fname').textContent = data.Fname || 'N/A';
+          document.getElementById('FOccupation').textContent = data.FOccupation || 'N/A';
+          document.getElementById('permanentAddress').textContent = data.permanentAddress || 'N/A';
+          document.getElementById('postalAddress').textContent = data.postalAddress || 'N/A';
+          document.getElementById('academic').textContent = data.academic || 'N/A';
+          document.getElementById('prepareFor').textContent = data.prepareFor || 'N/A';
+          document.getElementById('dateOfAdmission').textContent = data.dateOfAdmission ? new Date(data.dateOfAdmission).toLocaleDateString() : 'N/A';
+          
+          // Process and display seat slots
+          if (data.seats) {
+            const slots = Object.entries(data.seats)
+              .map(([key, value]) => `Seat: ${value.seatNumber}, ${capitalizeFirstLetter(value.slot)}`)
+              .join('<br>');
+            document.getElementById('slots').innerHTML = slots;
+          } else {
+            document.getElementById('slots').textContent = 'N/A';
+          }
         } else {
           document.getElementById('error-message').textContent = 'No details found.';
         }

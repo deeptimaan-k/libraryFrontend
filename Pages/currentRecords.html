@@ -3,28 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shakya Digital Library</title>
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+    <title>Student Records</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        input[type="text"] {
+            padding: 8px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 8px 16px;
+        }
         .loading-spinner {
             display: none;
             margin-left: 10px;
         }
-
         .loading-spinner img {
             width: 20px;
             height: 20px;
         }
     </style>
 </head>
-
 <body>
     <div id="nav-placeholder"></div>
     <div id="navigation"></div>
-
     <script>
-        // Function to fetch and render the navigation component
         function loadNavigation() {
             var xhttpHTML = new XMLHttpRequest();
             xhttpHTML.onreadystatechange = function () {
@@ -38,7 +61,6 @@
             xhttpHTML.send();
         }
 
-        // Function to load the CSS file for the navigation component
         function loadCSS() {
             var link = document.createElement('link');
             link.rel = 'stylesheet';
@@ -47,109 +69,93 @@
             document.head.appendChild(link);
         }
 
-        // Function to load the JavaScript file for the navigation component
         function loadScript() {
             var script = document.createElement('script');
             script.src = './NavigationBar/NavScript.js';
             document.body.appendChild(script);
         }
 
-        // Load the navigation component
         loadNavigation();
     </script>
-    <section>
-        <br><br><br><br>
-        <div class="container mt-4">
-            <h1 class="my-4">Current Students Report</h1>
-            <!-- Search form -->
-            <div class="row mb-3">
-                <div class="col-md-3">
-                    <select id="searchCriteria" class="form-select">
-                        <option value="name">Name</option>
-                        <option value="rollNumber">Registration Number</option>
-                        <option value="aadharNo">Aadhar Number</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <input type="text" id="searchInput" class="form-control" placeholder="Enter search term">
-                </div>
-                <div class="col-md-2">
-                    <button id="searchButton" class="btn btn-primary">Search
-                        <div class="loading-spinner">
-                            <img src="loading.gif" alt="Loading...">
-                        </div>
-                    </button>
-                </div>
+    <br><br><br><br>
+    <h1>Current Student Records</h1>
+
+    <!-- Search Form -->
+    <div class="container">
+        <div class="row mb-3 align-items-center">
+            <div class="col-md-3 col-12 mb-2 mb-md-0">
+                <select id="searchCriteria" class="form-select">
+                    <option value="name">Name</option>
+                    <option value="rollNumber">Registration Number</option>
+                    <option value="aadharNo">Aadhar Number</option>
+                </select>
             </div>
-            <!-- Export button -->
-            <div class="text-end mb-3">
-                <button id="exportButton" class="btn btn-primary">Export to Excel
-                    <div class="loading-spinner">
-                        <img src="loading.gif" alt="Loading...">
+            <div class="col-md-4 col-12 mb-2 mb-md-0">
+                <input type="text" id="searchInput" class="form-control" placeholder="Enter search term">
+            </div>
+            <div class="col-md-2 col-12">
+                <button id="searchButton" class="btn btn-primary position-relative">
+                    Search
+                    <div class="loading-spinner position-absolute d-none">
+                        <img src="loading.gif" alt="Loading..." style="width: 20px; height: 20px;">
                     </div>
                 </button>
             </div>
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>Roll Number</th>
-                            <th>Name</th>
-                            <th>Gender</th>
-                            <th>Date of Birth</th>
-                            <th>Aadhar Number</th>
-                            <th>Contact</th>
-                            <th>Residential Number</th>
-                            <th>Father's Name</th>
-                            <th>Father's Occupation</th>
-                            <th>Permanent Address</th>
-                            <th>Postal Address</th>
-                            <th>Academic</th>
-                            <th>Prepare For</th>
-                            <th>Date of Admission</th>
-                            <th>Slots</th>
-                            <th>Seat Number</th>
-                        </tr>
-                    </thead>
-                    <tbody id="studentTableBody">
-                    </tbody>
-                </table>
+            <div class="col-md-3 col-12 mt-2 mt-md-0">
+                <button id="exportButton" class="btn btn-success">
+                    <i class="fas fa-file-excel"></i> Export to Excel
+                </button>
             </div>
         </div>
-    </section>
+    </div>
+
+    <!-- Table to Display Student Records -->
+    <table id="studentsTable">
+        <thead>
+            <tr>
+                <th>Roll Number</th>
+                <th>Name</th>
+                <th>Gender</th>
+                <th>Date of Birth</th>
+                <th>Aadhar Number</th>
+                <th>Contact</th>
+                <th>Residential No</th>
+                <th>Father's Name</th>
+                <th>Father's Occupation</th>
+                <th>Permanent Address</th>
+                <th>Postal Address</th>
+                <th>Academic</th>
+                <th>Prepare For</th>
+                <th>Date of Admission</th>
+                <th>Seats</th> <!-- Added column for Seats -->
+            </tr>
+        </thead>
+        <tbody id="studentsBody">
+            <!-- Data will be populated here by JavaScript -->
+        </tbody>
+    </table>
+
     <script>
-        async function fetchStudents(query = "", criteria = "") {
+        async function fetchAllStudents() {
             try {
-                const url = query && criteria ? `https://librarybackend-wh54.onrender.com/currentRecords/search` : `https://librarybackend-wh54.onrender.com/currentRecords`;
-                const requestBody = query && criteria ? { [criteria]: query } : {};
-        
-                const options = query && criteria ? {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(requestBody)
-                } : {
-                    method: 'GET'
-                };
-                const response = await fetch(url, options);
-                const studentData = await response.json();
-        
-                if (!response.ok) {
-                    throw new Error(studentData.error || 'An error occurred');
-                }
-        
-                console.log('Fetched students:', studentData); // Debug log
-        
-                const tableBody = document.getElementById("studentTableBody");
-                tableBody.innerHTML = "";
-                studentData.forEach(student => {
-                    const row = document.createElement("tr");
+                const response = await fetch('http://localhost:3000/currentRecords');
+                const students = await response.json();
+
+                // Filter out inactive students
+                const activeStudents = students.filter(student => student.isActive);
+
+                const tableBody = document.getElementById('studentsBody');
+                tableBody.innerHTML = ''; // Clear previous data
+
+                activeStudents.forEach(student => {
+                    const seats = student.seats.map(seat => `Seat ${seat.seatNumber}, ${seat.slot}`).join('; ');
+
+                    const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${student.rollNumber}</td>
                         <td>${student.name}</td>
                         <td>${student.gender}</td>
-                        <td>${student.dob.substr(0, 10)}</td>
+                        <td>${new Date(student.dob).toLocaleDateString()}</td>
                         <td>${student.aadharNo}</td>
                         <td>${student.contact}</td>
                         <td>${student.residentialNo}</td>
@@ -159,62 +165,105 @@
                         <td>${student.postalAddress}</td>
                         <td>${student.academic}</td>
                         <td>${student.prepareFor}</td>
-                        <td>${student.dateOfAdmission.substr(0, 10)}</td>
-                        <td>${student.slots.map(slot => `<input type="checkbox" checked disabled> ${slot}`).join(", ")}</td>
-                        <td>${student.seatNumber}</td>
+                        <td>${new Date(student.dateOfAdmission).toLocaleDateString()}</td>
+                        <td>${seats}</td> <!-- Displaying the seats -->
                     `;
                     tableBody.appendChild(row);
                 });
             } catch (error) {
-                console.error("Error:", error);
-                alert(error.message || 'An error occurred');
+                console.error('Error fetching all students:', error);
             }
         }
-        
-        document.addEventListener("DOMContentLoaded", function () {
-            fetchStudents();
-        
-            document.getElementById("searchButton").addEventListener("click", function () {
-                const query = document.getElementById("searchInput").value;
-                const criteria = document.getElementById("searchCriteria").value;
-        
+
+        async function searchStudents() {
+            const searchInput = document.getElementById('searchInput').value.trim();
+            const searchCriteria = document.getElementById('searchCriteria').value;
+            const searchData = {};
+
+            if (searchInput === '') {
+                alert('Please enter a search term');
+                return;
+            }
+
+            searchData[searchCriteria] = searchInput;
+
+            try {
                 // Show loading spinner
-                document.querySelector('#searchButton .loading-spinner').style.display = 'inline-block';
-        
-                fetchStudents(query, criteria).finally(() => {
-                    // Hide loading spinner
-                    document.querySelector('#searchButton .loading-spinner').style.display = 'none';
+                document.querySelector('.loading-spinner').style.display = 'inline-block';
+
+                const response = await fetch('http://localhost:3000/currentRecords/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(searchData),
                 });
-            });
-        
-            document.getElementById("exportButton").addEventListener("click", function () {
-                const table = document.querySelector("table");
-                const tableData = Array.from(table.querySelectorAll("tr")).map(row =>
-                    Array.from(row.querySelectorAll("td, th")).map(cell => cell.textContent)
-                );
-        
-                // Make header row bold
-                const headerRow = tableData[0];
-                headerRow.forEach((cell, index) => {
-                    headerRow[index] = { v: cell, s: { font: { bold: true } } };
-                });
-        
-                const sheet = XLSX.utils.aoa_to_sheet(tableData);
-                const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, sheet, "Student Report");
-                XLSX.writeFile(workbook, "student_report.xlsx");
-        
+
+                // Check if the response is okay
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const students = await response.json();
+
                 // Hide loading spinner
-                document.querySelector('#exportButton .loading-spinner').style.display = 'none';
-            });
-        });
+                document.querySelector('.loading-spinner').style.display = 'none';
+
+                // Filter out inactive students
+                const activeStudents = students.filter(student => student.isActive);
+
+                const tableBody = document.getElementById('studentsBody');
+                tableBody.innerHTML = ''; // Clear previous data
+
+                if (!Array.isArray(activeStudents) || activeStudents.length === 0) {
+                    alert('No records found');
+                    fetchAllStudents(); // Re-fetch all students
+                    return;
+                }
+
+                activeStudents.forEach(student => {
+                    const seats = student.seats && student.seats.length > 0
+                        ? student.seats.map(seat => `Seat ${seat.seatNumber}, Slot ${seat.slot}`).join('; ')
+                        : 'No seats assigned';
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${student.rollNumber}</td>
+                        <td>${student.name}</td>
+                        <td>${student.gender}</td>
+                        <td>${new Date(student.dob).toLocaleDateString()}</td>
+                        <td>${student.aadharNo}</td>
+                        <td>${student.contact}</td>
+                        <td>${student.residentialNo}</td>
+                        <td>${student.Fname}</td>
+                        <td>${student.FOccupation}</td>
+                        <td>${student.permanentAddress}</td>
+                        <td>${student.postalAddress}</td>
+                        <td>${student.academic}</td>
+                        <td>${student.prepareFor}</td>
+                        <td>${new Date(student.dateOfAdmission).toLocaleDateString()}</td>
+                        <td>${seats}</td> <!-- Displaying the seats -->
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error searching for students:', error);
+                alert('An error occurred while searching for students');
+                document.querySelector('.loading-spinner').style.display = 'none'; // Hide spinner on error
+            }
+        }
+
+        function exportToExcel() {
+            const ws = XLSX.utils.table_to_sheet(document.getElementById('studentsTable'));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Students');
+            XLSX.writeFile(wb, 'StudentRecords.xlsx');
+        }
+
+        document.getElementById('searchButton').addEventListener('click', searchStudents);
+        document.getElementById('exportButton').addEventListener('click', exportToExcel);
+
+        fetchAllStudents();
     </script>
-    <!-- Bootstrap JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <!-- xlsx library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.0/xlsx.full.min.js"></script>
-    <!-- Fetch student data and populate the table -->
-
 </body>
-
 </html>

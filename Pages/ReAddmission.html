@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Shakya Digital Library - Activate Student</title>
+    <link rel="stylesheet" href="./css/formcss.css">
+</head>
+
+<body>
+    <div id="nav-placeholder"></div>
+    <div id="navigation"></div>
+
+    <script>
+        // Function to fetch and render the navigation component
+        function loadNavigation() {
+            var xhttpHTML = new XMLHttpRequest();
+            xhttpHTML.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("navigation").innerHTML = this.responseText;
+                    loadCSS();
+                    loadScript();
+                }
+            };
+            xhttpHTML.open("GET", "./NavigationBar/nav.html", true);
+            xhttpHTML.send();
+        }
+
+        // Function to load the CSS file for the navigation component
+        function loadCSS() {
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = './NavigationBar/NavStyle.css';
+            document.head.appendChild(link);
+        }
+
+        // Function to load the JavaScript file for the navigation component
+        function loadScript() {
+            var script = document.createElement('script');
+            script.src = './NavigationBar/NavScript.js';
+            document.body.appendChild(script);
+        }
+
+        // Load the navigation component
+        loadNavigation();
+    </script>
+
+    <br><br><br><br>
+
+    <div class="overlay"></div>
+    <div class="container">
+        <h1>Activate Student Record</h1>
+        <form id="studentForm">
+            <div>
+                <label for="rollNumber">Roll Number:</label>
+                <input type="text" id="rollNumber" name="rollNumber" required>
+                <br><br>
+                <button id="fetchButton" class="fetchButton" type="button">Fetch Record</button>
+            </div>
+            <div>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" readonly>
+            </div>
+            <div>
+                <label for="gender">Gender:</label>
+                <input type="text" id="gender" name="gender" readonly>
+            </div>
+            <div>
+                <label for="dob">Date of Birth:</label>
+                <input type="date" id="dob" name="dob" readonly>
+            </div>
+            <div>
+                <label for="aadharNo">Aadhar Number:</label>
+                <input type="text" id="aadharNo" name="aadharNo" readonly>
+            </div>
+            <div>
+                <label for="contact">Contact:</label>
+                <input type="text" id="contact" name="contact" readonly>
+            </div>
+            <div>
+                <label for="residentialNo">Residential Number:</label>
+                <input type="text" id="residentialNo" name="residentialNo" readonly>
+            </div>
+            <div>
+                <label for="Fname">Father's Name:</label>
+                <input type="text" id="Fname" name="Fname" readonly>
+            </div>
+            <div>
+                <label for="FOccupation">Father's Occupation:</label>
+                <input type="text" id="FOccupation" name="FOccupation" readonly>
+            </div>
+            <div>
+                <label for="permanentAddress">Permanent Address:</label>
+                <input type="text" id="permanentAddress" name="permanentAddress" readonly>
+            </div>
+            <div>
+                <label for="postalAddress">Postal Address:</label>
+                <input type="text" id="postalAddress" name="postalAddress" readonly>
+            </div>
+            <div>
+                <label for="academic">Academic:</label>
+                <input type="text" id="academic" name="academic" readonly>
+            </div>
+            <div>
+                <label for="prepareFor">Prepare For:</label>
+                <input type="text" id="prepareFor" name="prepareFor" readonly>
+            </div>
+            <div>
+                <label for="dateOfAdmission">Date of Admission:</label>
+                <input type="date" id="dateOfAdmission" name="dateOfAdmission" readonly>
+            </div>
+            
+            <div id="loading" class="loading-css" style="visibility: hidden;">
+                <img src="./loading.gif" alt="Loading...">
+            </div>
+            <button id="activateButton" class="activateButton" type="button" style="display: none;" onclick="activateStudent()">Activate Record</button>
+        </form>
+    </div>
+
+    <script>
+        // Define the activateStudent function globally
+        async function activateStudent() {
+            const rollNumber = document.getElementById("rollNumber").value;
+            if (!rollNumber) {
+                alert("Please enter a roll number");
+                return;
+            }
+
+            const loading = document.getElementById("loading");
+
+            try {
+                // Show loading GIF
+                loading.style.visibility = "visible";
+
+                // First, fetch the student data to check the current isActive status
+                const fetchResponse = await fetch(`http://localhost:3000/students/${rollNumber}`, {
+                    method: "GET"
+                });
+
+                const studentData = await fetchResponse.json();
+
+                if (!fetchResponse.ok) {
+                    throw new Error(studentData.error || 'An error occurred while fetching student data');
+                }
+
+                // Check if the student is already activated
+                if (studentData.isActive) {
+                    alert("This student's record is already active.");
+                    return;
+                }
+
+                // If the student is inactive, proceed with activation
+                const response = await fetch(`http://localhost:3000/students/${rollNumber}/activate`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        isActive: true,
+                        seats: [] // Optionally update seats field as needed
+                    })
+                });
+
+                const responseData = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(responseData.error || 'An error occurred during activation');
+                }
+
+                alert("Student record activated successfully");
+                window.location.href = `bookseat.html?rollNumber=${rollNumber}`;
+            } catch (error) {
+                console.error("Error:", error);
+                alert(error.message || 'An error occurred');
+            } finally {
+                // Hide loading GIF
+                loading.style.visibility = "hidden";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const fetchButton = document.getElementById("fetchButton");
+            const activateButton = document.getElementById("activateButton");
+
+            if (!fetchButton || !activateButton) {
+                console.error("Required elements are missing in the HTML");
+                return;
+            }
+
+            fetchButton.addEventListener("click", async function () {
+                const rollNumber = document.getElementById("rollNumber").value;
+        
+                try {
+                    // Show loading GIF
+                    document.getElementById("loading").style.visibility = "visible";
+        
+                    const response = await fetch(`http://localhost:3000/students/${rollNumber}`, {
+                        method: "GET"
+                    });
+        
+                    const studentData = await response.json();
+        
+                    if (!response.ok) {
+                        throw new Error(studentData.error || 'An error occurred while fetching student data');
+                    }
+        
+                    // Display fetched data in readonly mode
+                    document.getElementById("name").value = studentData.name;
+                    document.getElementById("gender").value = studentData.gender;
+                    document.getElementById("dob").value = studentData.dob.substr(0, 10);
+                    document.getElementById("aadharNo").value = studentData.aadharNo;
+                    document.getElementById("contact").value = studentData.contact;
+                    document.getElementById("residentialNo").value = studentData.residentialNo;
+                    document.getElementById("Fname").value = studentData.Fname;
+                    document.getElementById("FOccupation").value = studentData.FOccupation;
+                    document.getElementById("permanentAddress").value = studentData.permanentAddress;
+                    document.getElementById("postalAddress").value = studentData.postalAddress;
+                    document.getElementById("academic").value = studentData.academic;
+                    document.getElementById("prepareFor").value = studentData.prepareFor;
+                    document.getElementById("dateOfAdmission").value = studentData.dateOfAdmission.substr(0, 10);
+                    
+                    // Show the activate button
+                    activateButton.style.display = "block";
+                } catch (error) {
+                    console.error("Error:", error);
+                    alert(error.message || 'An error occurred');
+                } finally {
+                    // Hide loading GIF
+                    document.getElementById("loading").style.visibility = "hidden";
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

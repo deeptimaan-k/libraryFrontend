@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <title>Shakya Digital Library</title>
     <link rel="stylesheet" href="./css/formcss.css">
-
 </head>
 
 <body>
@@ -54,6 +53,7 @@
     <div class="container">
         <h1>Student Registration Form</h1>
         <form id="studentForm">
+            <!-- Form fields here -->
             <div>
                 <label for="rollNumber">Registration No. :</label>
                 <input type="text" id="rollNumber" name="rollNumber" required>
@@ -71,9 +71,8 @@
             </div>
             <div>
                 <label for="dob">DOB :</label>
-                <input type="Date" id="dob" name="dob" required>
+                <input type="date" id="dob" name="dob" required>
             </div>
-
             <div>
                 <label for="aadharNo">Aadhar Number:</label>
                 <input type="text" id="aadharNo" name="aadharNo" required>
@@ -99,33 +98,20 @@
                 <input type="text" id="permanentAddress" name="permanentAddress" required>
             </div>
             <div>
-                <label for="PostalAddress">Postal Address : </label>
+                <label for="postalAddress">Postal Address : </label>
                 <input type="text" id="postalAddress" name="postalAddress" required>
             </div>
             <div>
-                <label for="Academic">Academic Qualification : </label>
+                <label for="academic">Academic Qualification : </label>
                 <input type="text" id="academic" name="academic" required>
-            </div>
-            <div>
-                <label for="prepareFor">Prepare for : </label>
-                <input type="text" id="prepareFor" name="prepareFor" required>
             </div>
             <div>
                 <label for="dateOfAdmission">Date of Admission:</label>
                 <input type="date" id="dateOfAdmission" name="dateOfAdmission" required>
             </div>
             <div>
-                <label>Slots:</label><br>
-                <input type="checkbox" id="slot1" name="slots" value="slot1">
-                <label for="slot1">Slot 1</label><br>
-                <input type="checkbox" id="slot2" name="slots" value="slot2">
-                <label for="slot2">Slot 2</label><br>
-                <input type="checkbox" id="slot3" name="slots" value="slot3">
-                <label for="slot3">Slot 3</label><br>
-            </div>
-            <div>
-                <label for="seatNumber">Seat Number:</label>
-                <input type="text" id="seatNumber" name="seatNumber" required>
+                <label for="prepareFor">Prepare for : </label>
+                <input type="text" id="prepareFor" name="prepareFor" required>
             </div>
             <div id="loading" class="loading-css" style="visibility: hidden;">
                 <img src="./loading.gif" alt="Loading...">
@@ -139,13 +125,8 @@
             document.getElementById("submitButton").style.visibility = "hidden";
             document.getElementById("loading").style.visibility = "visible";
 
-            // Get selected checkboxes
-            const slots = Array.from(document.querySelectorAll('input[name="slots"]:checked')).map(checkbox => checkbox.value);
-            console.log(slots); // Check if all selected checkboxes are captured
-
             // Construct form data
-            const formData = new FormData(this);
-            formData.delete('slots'); // Remove existing slots data from FormData
+            const formData = new FormData(event.target);
 
             // Construct JSON object
             const jsonData = {
@@ -163,12 +144,10 @@
                 academic: formData.get('academic'),
                 prepareFor: formData.get('prepareFor'),
                 dateOfAdmission: formData.get('dateOfAdmission'),
-                slots: slots,
-                seatNumber: formData.get('seatNumber')
+                seats: [] // Empty object for seats
             };
-            console.log(jsonData);
             try {
-                const response = await fetch("https://librarybackend-wh54.onrender.com/students", {
+                const response = await fetch("http://localhost:3000/students", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -184,6 +163,7 @@
 
                 console.log(responseData);
                 alert("Student data submitted successfully!");
+                window.location.href = `bookseat.html?rollNumber=${jsonData.rollNumber}`;
                 // Clear form fields
                 document.getElementById("studentForm").reset();
 
@@ -196,8 +176,6 @@
                 document.getElementById("submitButton").style.visibility = "visible";
             }
         });
-
-
     </script>
 </body>
 

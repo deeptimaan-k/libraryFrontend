@@ -110,19 +110,7 @@
                 <label for="dateOfAdmission">Date of Admission:</label>
                 <input type="date" id="dateOfAdmission" name="dateOfAdmission" required>
             </div>
-            <div>
-                <label>Slots:</label><br>
-                <input type="checkbox" id="slot1" name="slots" value="slot1">
-                <label for="slot1">Slot 1</label><br>
-                <input type="checkbox" id="slot2" name="slots" value="slot2">
-                <label for="slot2">Slot 2</label><br>
-                <input type="checkbox" id="slot3" name="slots" value="slot3">
-                <label for="slot3">Slot 3</label><br>
-            </div>
-            <div>
-                <label for="seatNumber">Seat Number:</label>
-                <input type="text" id="seatNumber" name="seatNumber">
-            </div>
+            
             <div id="loading" class="loading-css" style="visibility: hidden;">
                 <img src="./loading.gif" alt="Loading...">
             </div>
@@ -139,7 +127,7 @@
             }
 
             try {
-                const response = await fetch(`https://librarybackend-wh54.onrender.com/students/${rollNumber}`, {
+                const response = await fetch(`http://localhost:3000/students/${rollNumber}`, {
                     method: "GET"
                 });
 
@@ -163,11 +151,6 @@
                 document.getElementById("academic").value = studentData.academic;
                 document.getElementById("prepareFor").value = studentData.prepareFor;
                 document.getElementById("dateOfAdmission").value = studentData.dateOfAdmission.substr(0, 10);
-                document.getElementById("slot1").checked = studentData.slots.includes("slot1");
-                document.getElementById("slot2").checked = studentData.slots.includes("slot2");
-                document.getElementById("slot3").checked = studentData.slots.includes("slot3");
-                document.getElementById("seatNumber").value = studentData.seatNumber;
-
             } catch (error) {
                 console.error("Error:", error);
                 alert(error.message || 'An error occurred');
@@ -181,13 +164,8 @@
                 return;
             }
 
-            // Get selected slots
-            const slots = [];
-            document.querySelectorAll('input[name="slots"]:checked').forEach(slot => slots.push(slot.value));
-
-            // Construct JSON object including slots
+            // Construct JSON object
             const jsonData = {
-                rollNumber: document.getElementById("rollNumber").value,
                 name: document.getElementById("name").value,
                 gender: document.getElementById("gender").value,
                 dob: document.getElementById("dob").value,
@@ -201,13 +179,11 @@
                 academic: document.getElementById("academic").value,
                 prepareFor: document.getElementById("prepareFor").value,
                 dateOfAdmission: document.getElementById("dateOfAdmission").value,
-                slots: slots,
-                seatNumber: document.getElementById("seatNumber").value
             };
 
             try {
-                const response = await fetch(`https://librarybackend-wh54.onrender.com/students/${rollNumber}`, {
-                    method: "PUT",
+                const response = await fetch(`http://localhost:3000/students/${rollNumber}`, {
+                    method: "PATCH",  // Change PUT to PATCH
                     headers: {
                         "Content-Type": "application/json"
                     },

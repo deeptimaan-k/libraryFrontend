@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Receipt</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+            background-color: #f8f9fa;
+        }
+        .receipt-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .library-info {
+            font-size: 32px; /* Increased font size for the library name */
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .receipt-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .student-details-card, .fee-records-card {
+            margin-top: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+        .student-details-card .card-body, .fee-records-card .card-body {
+            padding: 20px;
+        }
+        .student-details-card .row, .fee-records-card .row {
+            margin-bottom: 10px;
+        }
+        .student-details-card .col-md-6 {
+            padding: 5px;
+        }
+        .student-details-card .col-md-6 strong {
+            font-weight: bold;
+        }
+        .receipt-table th, .receipt-table td {
+            text-align: center;
+        }
+        .receipt-table {
+            margin-top: 20px;
+        }
+        .card-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        hr {
+            border: 0;
+            border-top: 2px solid #dee2e6;
+            margin: 20px 0;
+        }
+        .no-records {
+            text-align: center;
+            font-size: 18px;
+            color: #dc3545; /* Red color for error messages */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="receipt-container" id="receipt-content">
+        <!-- Header Section -->
+        <div class="receipt-header">
+            <div class="library-info">
+                Shakya Digital Library
+            </div>
+            <div>
+                Shakya Complex, Hartmann Road,<br>
+                Ramleela Ground, Bareilly
+            </div>
+            <h1 class="receipt-title">Fee Receipt</h1>
+        </div>
+
+        <!-- Student Details -->
+        <hr>
+        <div class="student-details-card">
+            <div class="card-body">
+                <h4 class="card-title">Student Details</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div><strong>Roll Number:</strong> <span id="rollNumber"></span></div>
+                        <div><strong>Name:</strong> <span id="name"></span></div>
+                        <div><strong>Gender:</strong> <span id="gender"></span></div>
+                        <div><strong>Date of Birth:</strong> <span id="dob"></span></div>
+                        <div><strong>Aadhar No:</strong> <span id="aadharNo"></span></div>
+                        <div><strong>Contact:</strong> <span id="contact"></span></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div><strong>Residential No:</strong> <span id="residentialNo"></span></div>
+                        <div><strong>Father's Name:</strong> <span id="Fname"></span></div>
+                        <div><strong>Permanent Address:</strong> <span id="permanentAddress"></span></div>
+                        <div><strong>Date of Admission:</strong> <span id="dateOfAdmission"></span></div>
+                        <div><strong>Seats and Slots:</strong></div>
+                        <ul id="seatsSlotsList"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- Fee Records -->
+        <div class="fee-records-card">
+            <div class="card-body">
+                <h4 class="card-title">Fee Records</h4>
+                <div id="no-records" class="no-records" style="display: none;">No fee records found.</div>
+                <table class="table table-bordered table-responsive receipt-table" id="fee-records" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Payment Date</th>
+                            <th>End Date</th>
+                            <th>Due Date</th>
+                            <th>Month</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <br>
+        <div class="text-center mb-3">
+            <button id="generatePdf" class="btn btn-primary">Print Receipt</button>
+        </div>
+    </div>
+    
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to format date as dd/mm/yyyy
+        function formatDate(dateString) {
+            const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-GB', options);
+        }
+
+        // Fetch studentObjectId from URL
+        const params = new URLSearchParams(window.location.search);
+        const studentObjectId = params.get('studentObjectId');
+
+        if (!studentObjectId) {
+            document.querySelector('.no-records').textContent = 'Student ID not provided.';
+            document.querySelector('.no-records').style.display = 'block';
+            return;
+        }
+
+        // Fetch data from the API
+        fetch(`http://localhost:3000/fees/${studentObjectId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok. Status: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data || !data.student) {
+                    document.querySelector('.no-records').textContent = 'Student record not found.';
+                    document.querySelector('.no-records').style.display = 'block';
+                    return;
+                }
+
+                // Populate Student Details
+                const student = data.student;
+                document.getElementById('rollNumber').textContent = student.rollNumber || 'N/A';
+                document.getElementById('name').textContent = student.name || 'N/A';
+                document.getElementById('gender').textContent = student.gender || 'N/A';
+                document.getElementById('dob').textContent = student.dob ? formatDate(student.dob) : 'N/A';
+                document.getElementById('aadharNo').textContent = student.aadharNo || 'N/A';
+                document.getElementById('contact').textContent = student.contact || 'N/A';
+                document.getElementById('residentialNo').textContent = student.residentialNo || 'N/A';
+                document.getElementById('Fname').textContent = student.Fname || 'N/A';
+                document.getElementById('permanentAddress').textContent = student.permanentAddress || 'N/A';
+                document.getElementById('dateOfAdmission').textContent = student.dateOfAdmission ? formatDate(student.dateOfAdmission) : 'N/A';
+
+                // Populate Seats and Slots
+                const seatsSlotsList = document.getElementById('seatsSlotsList');
+                if (student.seats && student.seats.length > 0) {
+                    student.seats.forEach(seat => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `Seat Number: ${seat.seatNumber}, Slot: ${seat.slot}`;
+                        seatsSlotsList.appendChild(listItem);
+                    });
+                } else {
+                    seatsSlotsList.innerHTML = '<li>No seats assigned.</li>';
+                }
+
+                // Populate Fee Records
+                const feesRecord = data.fees_record || {};
+                const feeRecordsTable = document.getElementById('fee-records');
+                const noRecords = document.getElementById('no-records');
+                
+                if (Object.keys(feesRecord).length === 0) {
+                    noRecords.textContent = 'No fee records found.';
+                    noRecords.style.display = 'block';
+                    feeRecordsTable.style.display = 'none';
+                } else {
+                    feeRecordsTable.style.display = 'table';
+                    noRecords.style.display = 'none';
+                    const feeRecordsTableBody = feeRecordsTable.getElementsByTagName('tbody')[0];
+                    for (const [date, record] of Object.entries(feesRecord)) {
+                        const row = feeRecordsTableBody.insertRow();
+                        row.innerHTML = `
+                            <td>${formatDate(date)}</td>
+                            <td>${record.endDate ? formatDate(record.endDate) : 'N/A'}</td>
+                            <td>${record.dueDate ? formatDate(record.dueDate) : 'N/A'}</td>
+                            <td>${record.month || 'N/A'}</td>
+                            <td>${record.amount || 'N/A'}</td>
+                        `;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                document.querySelector('.no-records').textContent = 'Error fetching fee records: ' + error.message;
+                document.querySelector('.no-records').style.display = 'block';
+            });
+
+        // Print Receipt
+        document.getElementById('generatePdf').addEventListener('click', function() {
+            window.print();
+        });
+    });
+</script>
+</body>
+</html>

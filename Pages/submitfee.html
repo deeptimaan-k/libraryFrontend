@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Shakya Digital Library - Fees Dashboard</title>
+    <link rel="stylesheet" href="./css/dashboard.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd;
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+            color: #4A90E2;
+            margin-bottom: 20px;
+            font-weight: 400;
+        }
+
+        .form-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            flex: 1;
+            margin-right: 20px;
+            min-width: 100px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            flex: 2;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .button {
+            display: block;
+            width: 100%;
+            max-width: 200px;
+            margin: 20px auto;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4A90E2;
+            color: #fff;
+            cursor: pointer;
+            text-align: center;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #357ABD;
+        }
+
+        .loading-css {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .loading-css img {
+            width: 50px;
+        }
+
+        .student-details,
+        .fee-status,
+        .fee-receipt-form {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f7f7f7;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .student-details p,
+        .fee-status p {
+            margin: 10px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .fee-status h2 {
+            margin-bottom: 15px;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .input-container input {
+            flex-grow: 1;
+        }
+
+        .fee-card {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .fee-card.green {
+            background-color: #28a745;
+        }
+
+        .fee-card.red {
+            background-color: #dc3545;
+        }
+
+        .fee-card span {
+            font-weight: bold;
+        }
+
+        /* Styling for fee table */
+        #feeTable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #feeTable th,
+        #feeTable td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        #feeTable th {
+            background-color: #4A90E2;
+            color: white;
+            font-weight: bold;
+        }
+
+        #feeTable tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #feeTable tr:hover {
+            background-color: #ddd;
+        }
+        /* Additional CSS for Fee Records */
+.fee-records-card {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.fee-records-card .card-body {
+    padding: 0;
+}
+
+.fee-records-card .card-title {
+    font-size: 18px;
+    color: #4A90E2;
+    margin-bottom: 15px;
+}
+
+.receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.receipt-table th,
+.receipt-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.receipt-table th {
+    background-color: #4A90E2;
+    color: white;
+    font-weight: bold;
+}
+
+.receipt-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.receipt-table tr:hover {
+    background-color: #ddd;
+}
+.card-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.button-container {
+    margin-top: 20px; /* Add some space between the table and the button */
+    display: flex;
+    justify-content: flex-end; /* Align the button to the right */
+}
+
+#show-receipt-button {
+    padding: 10px 20px; /* Adjust the padding for the button */
+    font-size: 16px; /* Set a readable font size */
+    color: #fff; /* Set the text color to white */
+    background-color: #007bff; /* Set the background color */
+    border: none; /* Remove default border */
+    border-radius: 5px; /* Round the corners */
+    cursor: pointer; /* Change cursor to pointer on hover */
+    transition: background-color 0.3s; /* Smooth transition for background color */
+}
+
+#show-receipt-button:hover {
+    background-color: #0056b3; /* Darken the background color on hover */
+}
+
+
+    </style>
+</head>
+
+<body>
+    <div id="nav-placeholder"></div>
+    <div id="navigation"></div>
+    <script>
+        function loadNavigation() {
+            var xhttpHTML = new XMLHttpRequest();
+            xhttpHTML.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("navigation").innerHTML = this.responseText;
+                    loadCSS();
+                    loadScript();
+                }
+            };
+            xhttpHTML.open("GET", "./NavigationBar/nav.html", true);
+            xhttpHTML.send();
+        }
+
+        function loadCSS() {
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = './NavigationBar/NavStyle.css';
+            document.head.appendChild(link);
+        }
+
+        function loadScript() {
+            var script = document.createElement('script');
+            script.src = './NavigationBar/NavScript.js';
+            document.body.appendChild(script);
+        }
+
+        loadNavigation();
+    </script>
+    <div class="container">
+        <h1>Fees Dashboard</h1>
+
+        <!-- Form to Fetch Student Data -->
+        <form id="studentForm">
+            <div class="form-group input-container">
+                <label for="rollNumber">Reg No. :</label>
+                <input type="text" id="rollNumber" name="rollNumber" required placeholder="Enter registration number">
+                <button class="button" type="button" onclick="fetchStudentData()">Fetch Data</button>
+            </div>
+        </form>
+
+        <!-- Display Student Details -->
+        <div id="studentDetails" class="student-details" style="display: none;">
+            <h2>Student Details</h2>
+            <p><strong>Name:</strong> <span id="name"></span></p>
+            <p><strong>Gender:</strong> <span id="gender"></span></p>
+            <p><strong>Date of Birth:</strong> <span id="dob"></span></p>
+            <p><strong>Aadhar Number:</strong> <span id="aadharNo"></span></p>
+            <p><strong>Mobile No.:</strong> <span id="contact"></span></p>
+            <p><strong>Father's Name:</strong> <span id="Fname"></span></p>
+            <p><strong>Father's Occupation:</strong> <span id="FOccupation"></span></p>
+            <p><strong>Permanent Address:</strong> <span id="permanentAddress"></span></p>
+            <p><strong>Postal Address:</strong> <span id="postalAddress"></span></p>
+            <p><strong>Academic:</strong> <span id="academic"></span></p>
+            <p><strong>Prepare For:</strong> <span id="prepareFor"></span></p>
+            <p><strong>Date of Admission:</strong> <span id="dateOfAdmission"></span></p>
+            <p><strong>Slots:</strong> <span id="slots"></span></p>
+        </div>
+
+        <!-- Display Fee Status -->
+        <div class="fee-records-card">
+            <div class="card-body">
+                <h4 class="card-title">Fee Records</h4>
+                <table class="table table-bordered table-responsive receipt-table" id="fee-records">
+                    <thead>
+                        <tr>
+                            <th>Payment Date</th>
+                            <th>End Date</th>
+                            <th>Due Date</th>
+                            <th>Month</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+                <!-- Button container for alignment -->
+                <div class="button-container">
+                    <button class="btn btn-primary" id="show-receipt-button" style="display: none;">Show Receipt</button>
+                </div>
+            </div>
+        </div>
+        
+        
+        <!-- Display Fee Status -->
+<div class="fee-status">
+    <h2>Pay Fees</h2>
+    <div id="feeCards"></div>
+    
+    <!-- Form to Pay Fees -->
+    <div class="fee-receipt-form" id="feeReceiptForm" style="display: none;">
+        <h2>Submit Fee Payment</h2>
+        <form id="feeForm">
+            <div class="form-group">
+                <label for="currentDate">Current Date:</label>
+                <input type="date" id="currentDate" name="currentDate" required disabled>
+            </div>
+            <div class="form-group">
+                <label for="month">Month:</label>
+                <input type="Number" id="month" name="month" required>
+            </div>
+            <div class="form-group">
+                <label for="endDate">End Date:</label>
+                <input type="date" id="endDate" name="endDate" required disabled>
+            </div>
+            
+            <div class="form-group">
+                <label for="dueDate">Due Date:</label>
+                <input type="date" id="dueDate" name="dueDate" required disabled>
+            </div>
+            <div class="form-group">
+                <label for="amount">Amount:</label>
+                <input type="number" id="amount" name="amount" required placeholder="Enter amount" disabled>
+            </div>
+            <button class="button" type="button" onclick="submitFeeDetails()">Submit Fee</button>
+        </form>
+    </div>
+</div>
+
+
+    </div>
+
+   <script>
+    let studentObjectId = '';
+
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+}
+
+function calculateEndDate(currentDate, month) {
+    const date = new Date(currentDate);
+    date.setMonth(date.getMonth() + parseInt(month, 10));
+    date.setDate(date.getDate() - 1);
+    return date.toISOString().split('T')[0];
+}
+
+function calculateDueDate(currentDate, month) {
+    const date = new Date(currentDate);
+    date.setMonth(date.getMonth() + parseInt(month, 10));
+    return date.toISOString().split('T')[0];
+}
+
+function updateEndDate() {
+    const currentDate = document.getElementById("currentDate").value;
+    const month = document.getElementById("month").value;
+    if (currentDate && month) {
+        const endDate = calculateEndDate(currentDate, month);
+        document.getElementById("endDate").value = endDate;
+    }
+}
+
+function updateDueDate() {
+    const currentDate = document.getElementById("currentDate").value;
+    const month = document.getElementById("month").value;
+    if (currentDate && month) {
+        const dueDate = calculateDueDate(currentDate, month);
+        document.getElementById("dueDate").value = dueDate;
+    }
+}
+
+async function fetchStudentData() {
+    const rollNumber = document.getElementById("rollNumber").value.trim();
+
+    if (rollNumber === "") {
+        alert("Please enter the registration number.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://localhost:3000/students/${rollNumber}`);
+        if (!response.ok) {
+            throw new Error('Student not found.');
+        }
+        const student = await response.json();
+
+        studentObjectId = student._id;
+
+        document.getElementById("name").innerText = student.name || 'N/A';
+        document.getElementById("gender").innerText = student.gender || 'N/A';
+        document.getElementById("dob").innerText = formatDate(student.dob);
+        document.getElementById("aadharNo").innerText = student.aadharNo || 'N/A';
+        document.getElementById("contact").innerText = student.contact || 'N/A';
+        document.getElementById("Fname").innerText = student.Fname || 'N/A';
+        document.getElementById("FOccupation").innerText = student.FOccupation || 'N/A';
+        document.getElementById("permanentAddress").innerText = student.permanentAddress || 'N/A';
+        document.getElementById("postalAddress").innerText = student.postalAddress || 'N/A';
+        document.getElementById("academic").innerText = student.academic || 'N/A';
+        document.getElementById("prepareFor").innerText = student.prepareFor || 'N/A';
+        document.getElementById("dateOfAdmission").innerText = formatDate(student.dateOfAdmission);
+        console.log(studentObjectId);
+        const slotsContainer = document.getElementById("slots");
+        slotsContainer.innerHTML = ""; // Clear previous content
+        student.seats.forEach(seat => {
+            const seatInfo = document.createElement("p");
+            seatInfo.innerText = `Seat: ${seat.seatNumber}, Slot: ${seat.slot}`;
+            slotsContainer.appendChild(seatInfo);
+        });
+
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("currentDate").value = today;
+        document.getElementById("studentDetails").style.display = "block";
+        document.getElementById("feeReceiptForm").style.display = "block";
+
+        // Fetch and display fee records
+        fetchFeeRecords();
+    } catch (error) {
+        alert(error.message);
+    }
+}
+document.addEventListener('DOMContentLoaded', function () {
+    // Add event listener to the "Show Receipt" button
+    document.getElementById('show-receipt-button').addEventListener('click', function () {
+        // Check if the studentObjectId is available
+        if (studentObjectId) {
+            // Open the fee receipt page with the studentObjectId in the URL
+            window.open(`feerecipt.html?studentObjectId=${studentObjectId}`, '_blank');
+        } else {
+            alert('No student data available. Please fetch student data first.');
+        }
+    });
+});
+function calculateAmount() {
+    const numberOfSlots = document.getElementById("slots").children.length;
+    const month = parseInt(document.getElementById("month").value, 10);
+    let amountPerSlot;
+
+    switch (numberOfSlots) {
+        case 1:
+            amountPerSlot = 600;
+            break;
+        case 2:
+            amountPerSlot = 1000;
+            break;
+        case 3:
+            amountPerSlot = 1200;
+            break;
+        default:
+            amountPerSlot = 0;
+            break;
+    }
+
+    const totalAmount = amountPerSlot * month;
+    document.getElementById("amount").value = totalAmount;
+}
+
+async function submitFeeDetails() {
+    const amount = document.getElementById("amount").value.trim();
+    const currentDate = document.getElementById("currentDate").value.trim();
+    const endDate = document.getElementById("endDate").value.trim();
+    const dueDate = document.getElementById("dueDate").value.trim();
+    const month = document.getElementById("month").value;
+
+    if (!amount || !currentDate || !endDate || !dueDate || !month) {
+        alert("Please fill out all fields.");
+        return;
+    }
+
+    try {
+       
+        const response = await fetch(`http://localhost:3000/fees/${studentObjectId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ currentDate, endDate, dueDate, month, amount })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to submit fee details.');
+        }
+
+        const result = await response.json();
+        alert(result.message);
+        // Refresh fee records after submission
+        fetchFeeRecords();
+    } catch (error) {
+        alert("Error submitting fee details: " + error.message);
+    }
+}
+
+async function fetchFeeRecords() {
+    try {
+        // Define the API endpoint using studentObjectId
+        const response = await fetch(`http://localhost:3000/fees/${studentObjectId}`, {
+            method: 'GET'  // Explicitly specify GET method (optional, as it's default)
+        });
+        const data = await response.json();
+
+        // Get the table body element
+        const feeRecordsTableBody = document.getElementById('fee-records').getElementsByTagName('tbody')[0];
+        feeRecordsTableBody.innerHTML = ""; // Clear existing rows
+
+        // Check if data is null or empty
+        if (!data || data === 0 || !data.fees_record || Object.keys(data.fees_record).length === 0) {
+            // No records found
+            const row = feeRecordsTableBody.insertRow();
+            row.innerHTML = `
+                <td colspan="5" style="text-align: center; color: #888;">No records found</td>
+            `;
+            // Hide the "Show Receipt" button
+            document.getElementById('show-receipt-button').style.display = 'none';
+            return;
+        }
+
+        // Populate table with fee records
+        for (const [date, record] of Object.entries(data.fees_record)) {
+            const row = feeRecordsTableBody.insertRow();
+            row.innerHTML = `
+                <td>${formatDate(date)}</td>
+                <td>${formatDate(record.endDate)}</td>
+                <td>${formatDate(record.dueDate)}</td>
+                <td>${record.month}</td>
+                <td>${record.amount}</td>
+            `;
+        }
+
+        // Show the "Show Receipt" button
+        document.getElementById('show-receipt-button').style.display = 'block';
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        alert("Failed to fetch fee records. Please try again later.");
+        // Ensure the button is hidden in case of an error
+        document.getElementById('show-receipt-button').style.display = 'none';
+    }
+}
+
+
+
+
+
+document.getElementById("month").addEventListener('input', () => {
+    updateEndDate();
+    updateDueDate();
+    calculateAmount();
+});
+
+document.getElementById("currentDate").addEventListener('input', () => {
+    updateEndDate();
+    updateDueDate();
+});
+
+   </script>
+</body>
+
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seating Plan</title>
+  <style>
+    /* Existing CSS... */
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+
+    .dropdown {
+      margin: 20px;
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .dropdown select {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transition: box-shadow 0.3s;
+    }
+
+    .dropdown select:focus {
+      outline: none;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 10px;
+      padding: 10px;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 90vw;
+      max-width: 900px;
+      height: auto;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .seat {
+      display: flex;
+      flex-direction: column;
+      border: 2px solid #333;
+      border-radius: 5px;
+      background-color: #e0e0e0;
+      cursor: pointer;
+      position: relative;
+      transition: background-color 0.3s;
+      height: 80px;
+      box-sizing: border-box;
+    }
+
+    .seat-parts {
+      display: flex;
+      flex-direction: row;
+      height: 60px;
+      position: relative;
+      border-bottom: 2px solid #333;
+    }
+
+    .seat-part {
+      flex: 1;
+      position: relative;
+      border-right: 2px solid #333;
+      cursor: pointer;
+    }
+
+    .seat-part:last-child {
+      border-right: none;
+    }
+
+    .seat-part:hover .tooltip {
+      display: block;
+    }
+
+    .seat-number {
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      border-top: 2px solid #333;
+      height: 20px;
+      line-height: 20px;
+      background-color: #e0e0e0;
+      position: relative;
+    }
+
+    .seat.selected .seat-number {
+      color: #fff;
+    }
+
+    .seat-part.selected {
+      background-color: #4caf50 !important;
+    }
+
+    .seat-part:hover {
+      background-color: #d0d0d0;
+    }
+
+    .tooltip {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      padding: 5px;
+      border-radius: 5px;
+      font-size: 12px;
+      display: none; /* Hidden by default */
+      white-space: nowrap;
+      z-index: 10;
+      bottom: 100%; /* Position above the seat part */
+      left: 50%;
+      transform: translateX(-50%);
+      margin-bottom: 5px; /* Add some space between the tooltip and the seat part */
+    }
+
+    .form-container {
+      margin: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .roll-number-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .roll-number-form input {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .roll-number-form button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #4caf50;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .roll-number-form button:hover {
+      background-color: #45a049;
+    }
+
+    .submit-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #4caf50;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .submit-button:hover {
+      background-color: #45a049;
+    }
+
+    .seating-selection {
+      display: none; /* Hidden by default */
+      margin: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <div class="roll-number-form">
+      <input type="text" id="rollNumberInput" placeholder="Enter Roll Number">
+      <button onclick="fetchAndDisplaySeats()">Show Seats</button>
+    </div>
+    <div id="seatingSelection" class="seating-selection">
+      <div class="container">
+        <!-- JavaScript will populate seats here -->
+      </div>
+      <button class="submit-button" onclick="submitSelection()">Submit</button>
+    </div>
+  </div>
+
+<script>
+  const totalSeats = 178; // Define the total number of seats
+  const maxSelections = 3; // Maximum number of selectable slots
+  const selectedSlots = { slot1: null, slot2: null, slot3: null }; // Track selected slots for each slot type
+  let selectedSeats = new Map(); // Use a Map to track selected slots
+  let occupiedSeats = new Set(); // To keep track of already occupied seats
+
+  // Function to fetch and display seats
+  function fetchAndDisplaySeats() {
+    let rollNumber = document.getElementById('rollNumberInput').value.trim();
+
+    if (!rollNumber) {
+      alert('Please enter a roll number');
+      return;
+    }
+
+    fetch('http://localhost:3000/currentRecords')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Fetched data:', data);
+
+        const seatInfoMap = new Map();
+        const currentSelections = new Set(); // To store already selected seats
+
+        // Determine occupied seats and prepare seat info map
+        data.forEach(student => {
+          if (student.seats) {
+            student.seats.forEach(seat => {
+              const seatNumber = parseInt(seat.seat || seat.seatNumber, 10);
+              if (seatNumber >= 1 && seatNumber <= totalSeats) {
+                if (!seatInfoMap.has(seatNumber)) {
+                  seatInfoMap.set(seatNumber, {});
+                }
+                seatInfoMap.get(seatNumber)[seat.slot || seat.slot] = {
+                  name: student.name,
+                  rollNumber: student.rollNumber,
+                  Fname: student.Fname
+                };
+                occupiedSeats.add(`${seatNumber}-${seat.slot}`);
+              }
+            });
+          }
+        });
+        console.log('Seat info map:', seatInfoMap);
+
+        const container = document.querySelector('.container');
+        container.innerHTML = '';
+
+        for (let i = 1; i <= totalSeats; i++) {
+          const seat = document.createElement('div');
+          seat.classList.add('seat');
+
+          const seatParts = document.createElement('div');
+          seatParts.classList.add('seat-parts');
+
+          // Create 3 parts for each seat
+          for (let part = 1; part <= 3; part++) {
+            const seatPart = document.createElement('div');
+            seatPart.classList.add('seat-part');
+
+            const key = `${i}-slot${part}`;
+            const isOccupied = occupiedSeats.has(key);
+
+            // Apply classes based on seat status
+            if (isOccupied) {
+              seatPart.classList.add('occupied');
+              seatPart.classList.remove('unselected', 'selected');
+            } else {
+              seatPart.classList.add('unselected');
+              seatPart.classList.remove('occupied', 'selected');
+            }
+
+            const tooltip = document.createElement('div');
+            tooltip.classList.add('tooltip');
+            tooltip.classList.add(`tooltip-slot${part}`);
+
+            if (seatInfoMap.has(i) && seatInfoMap.get(i)[`slot${part}`]) {
+              const studentInfo = seatInfoMap.get(i)[`slot${part}`];
+              tooltip.innerHTML = `<strong>Slot ${part}</strong><br>Name: ${studentInfo.name}<br>Roll Number: ${studentInfo.rollNumber}<br>Father's Name: ${studentInfo.Fname}`;
+              
+              seatPart.classList.add('selected'); // Initially mark as selected if fetched data has it
+            } else {
+              tooltip.innerHTML = `<strong>Slot ${part}</strong><br>Unoccupied`;
+            }
+
+            seatPart.addEventListener('click', () => {
+              if (isOccupied) {
+                alert('This slot is already occupied.');
+                return;
+              }
+              if (selectedSeats.has(key)) {
+                selectedSeats.delete(key);
+                selectedSlots[`slot${part}`] = null;
+                seatPart.classList.remove('selected');
+                seatPart.classList.add('unselected');
+                console.log(`Deselected Seat ${i}, Slot ${part}`);
+              } else {
+                if (selectedSeats.size < maxSelections && !selectedSlots[`slot${part}`]) {
+                  selectedSeats.set(key, { seatNumber: i, slot: `slot${part}` });
+                  selectedSlots[`slot${part}`] = key;
+                  seatPart.classList.add('selected');
+                  seatPart.classList.remove('unselected');
+                  console.log(`Selected Seat ${i}, Slot ${part}`);
+                } else if (selectedSlots[`slot${part}`]) {
+                  alert(`Slot ${part} is already selected.`);
+                } else {
+                  alert(`You can only select up to ${maxSelections} slots.`);
+                }
+              }
+              console.log('Current selection:', Array.from(selectedSeats.values()));
+            });
+
+            seatPart.appendChild(tooltip);
+            seatParts.appendChild(seatPart);
+          }
+
+          seat.appendChild(seatParts);
+
+          const seatNumber = document.createElement('div');
+          seatNumber.classList.add('seat-number');
+          seatNumber.textContent = i;
+
+          seat.appendChild(seatNumber);
+          container.appendChild(seat);
+        }
+
+        // Show the seating selection section
+        document.getElementById('seatingSelection').style.display = 'block';
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+}
+  function submitSelection() {
+    const rollNumber = document.getElementById('rollNumberInput').value.trim(); // Ensure rollNumber is declared here
+
+    if (selectedSeats.size === 0) {
+      alert('Please select at least one seat');
+      return;
+    }
+
+    const seatArray = Array.from(selectedSeats.values()).map(({ seatNumber, slot }) => ({
+      seatNumber: seatNumber,
+      slot: slot
+    }));
+
+    fetch(`http://localhost:3000/students/seatbooking/${rollNumber}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        seats: seatArray
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      alert('Seats updated successfully');
+      document.getElementById('seatingSelection').style.display = 'none';
+      window.location.href = `dashboard.html`;
+      document.getElementById('rollNumberInput').value = '';
+      selectedSeats.clear();
+      Object.keys(selectedSlots).forEach(key => selectedSlots[key] = null);
+    })
+    .catch(error => {
+      console.error('Error updating seats:', error);
+    });
+  }
+
+  // Check URL parameter and populate roll number input if present
+  window.addEventListener('load', () => {
+    const params = new URLSearchParams(window.location.search);
+    const rollNumber = params.get('rollNumber');
+    if (rollNumber) {
+      document.getElementById('rollNumberInput').value = rollNumber;
+      fetchAndDisplaySeats(); // Automatically fetch and display seats if roll number is present
+    }
+  });
+</script>
+
+</script>
+
+</body>
+</html>

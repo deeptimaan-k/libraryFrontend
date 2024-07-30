@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Fee Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        input[type="date"], select {
+            padding: 10px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="nav-placeholder"></div>
+    <div id="navigation"></div>
+    <!-- <img src="../../index.html" -->
+    <script>
+        // Function to fetch and render the navigation component
+        function loadNavigation() {
+            var xhttpHTML = new XMLHttpRequest();
+            xhttpHTML.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("navigation").innerHTML = this.responseText;
+                    loadCSS();
+                    loadScript();
+                }
+            };
+            xhttpHTML.open("GET", "./NavigationBar/nav.html", true);
+            xhttpHTML.send();
+        }
+
+        // Function to load the CSS file for the navigation component
+        function loadCSS() {
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = './NavigationBar/NavStyle.css';
+            document.head.appendChild(link);
+        }
+
+        // Function to load the JavaScript file for the navigation component
+        function loadScript() {
+            var script = document.createElement('script');
+            script.src = './NavigationBar/NavScript.js';
+            document.body.appendChild(script);
+        }
+
+        // Load the navigation component
+        loadNavigation();
+    </script>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div class="container">
+        <h1>Student Fee Status</h1>
+        <label for="dateInput">Select Date:</label>
+        <input type="date" id="dateInput" name="dateInput">
+
+        <label for="statusSelect">Select Status:</label>
+        <select id="statusSelect">
+            <option value="due">Paid Fees</option>
+            <option value="paid">Due Fees</option>
+        </select>
+
+        <table id="studentTable">
+            <thead>
+                <tr>
+                    <th>Roll Number</th>
+                    <th>Name</th>
+                    <th>End Date</th>
+                    <th>Due Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Student records will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+            const year = date.getFullYear();
+            return `${day}-${month}-${year}`;
+        }
+
+        function updateTable(data, selectedDate, status) {
+            const tbody = document.getElementById('studentTable').getElementsByTagName('tbody')[0];
+            tbody.innerHTML = ''; // Clear previous results
+
+            data.forEach(record => {
+                const feeRecord = record.fees_record[Object.keys(record.fees_record)[0]]; // Get the first fee record
+
+                if (feeRecord) {
+                    const endDate = new Date(feeRecord.endDate);
+                    const isDue = endDate > selectedDate;
+
+                    if ((status === 'due' && isDue) || (status === 'paid' && !isDue)) {
+                        const row = tbody.insertRow();
+                        row.insertCell().textContent = record.student.rollNumber;
+                        row.insertCell().textContent = record.student.name;
+                        row.insertCell().textContent = formatDate(feeRecord.endDate);
+                        row.insertCell().textContent = formatDate(feeRecord.dueDate);
+                    }
+                } else if (status === 'paid') {
+                    // If no fee record exists and the status is 'paid', include this student
+                    const row = tbody.insertRow();
+                    row.insertCell().textContent = record.student.rollNumber;
+                    row.insertCell().textContent = record.student.name;
+                    row.insertCell().textContent = 'No fees record';
+                    row.insertCell().textContent = 'No fees record';
+                }
+            });
+        }
+
+        document.getElementById('dateInput').addEventListener('change', function() {
+            const selectedDate = new Date(this.value);
+            const status = document.getElementById('statusSelect').value;
+
+            fetch('http://localhost:3000/fees-student-data')
+                .then(response => response.json())
+                .then(data => updateTable(data, selectedDate, status))
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        });
+
+        document.getElementById('statusSelect').addEventListener('change', function() {
+            const selectedDate = new Date(document.getElementById('dateInput').value);
+            const status = this.value;
+
+            if (selectedDate) {
+                fetch('http://localhost:3000/fees-student-data')
+                    .then(response => response.json())
+                    .then(data => updateTable(data, selectedDate, status))
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                    });
+            }
+        });
+    </script>
+</body>
+</html>
