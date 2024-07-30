@@ -174,7 +174,7 @@
     const rollNumber = params.get('rollNumber');
 
     // Fetch student details using the roll number
-    fetch(`http://localhost:3000/students/${rollNumber}`)
+    fetch(`https://librarybackend-wh54.onrender.com/students/${rollNumber}`)
       .then(response => response.json())
       .then(data => {
         console.log('Fetched data:', data); // Debugging step

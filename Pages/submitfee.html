@@ -425,7 +425,7 @@ async function fetchStudentData() {
     }
 
     try {
-        const response = await fetch(`http://localhost:3000/students/${rollNumber}`);
+        const response = await fetch(`https://librarybackend-wh54.onrender.com/students/${rollNumber}`);
         if (!response.ok) {
             throw new Error('Student not found.');
         }
@@ -515,7 +515,7 @@ async function submitFeeDetails() {
 
     try {
        
-        const response = await fetch(`http://localhost:3000/fees/${studentObjectId}`, {
+        const response = await fetch(`https://librarybackend-wh54.onrender.com/fees/${studentObjectId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -539,7 +539,7 @@ async function submitFeeDetails() {
 async function fetchFeeRecords() {
     try {
         // Define the API endpoint using studentObjectId
-        const response = await fetch(`http://localhost:3000/fees/${studentObjectId}`, {
+        const response = await fetch(`https://librarybackend-wh54.onrender.com/fees/${studentObjectId}`, {
             method: 'GET'  // Explicitly specify GET method (optional, as it's default)
         });
         const data = await response.json();

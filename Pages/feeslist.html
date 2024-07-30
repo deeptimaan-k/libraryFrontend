@@ -147,7 +147,7 @@
             const selectedDate = new Date(this.value);
             const status = document.getElementById('statusSelect').value;
 
-            fetch('http://localhost:3000/fees-student-data')
+            fetch('https://librarybackend-wh54.onrender.com/fees-student-data')
                 .then(response => response.json())
                 .then(data => updateTable(data, selectedDate, status))
                 .catch(error => {
@@ -160,7 +160,7 @@
             const status = this.value;
 
             if (selectedDate) {
-                fetch('http://localhost:3000/fees-student-data')
+                fetch('https://librarybackend-wh54.onrender.com/fees-student-data')
                     .then(response => response.json())
                     .then(data => updateTable(data, selectedDate, status))
                     .catch(error => {
